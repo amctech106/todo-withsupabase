@@ -1,56 +1,77 @@
-
 const inp = document.querySelector("#add-todo");
-const btn = document.querySelector("button")
-const result = document.querySelector("#result")
-
+const btn = document.querySelector("button");
+const result = document.querySelector("#result");
 
 const supabaseConnect = supabase.createClient(
     "https://gapkxjiupqjinncgjonc.supabase.co",
     "sb_publishable_ZLGVvTKhtdx_VvbjSPGZfw_64HfEpFF"
-)
+);
 
-const getData =async()=>{
-result.innerHTML = "";
-const response = await supabaseConnect.from("todos").select("*");
-const todos = response.data
+//ڈیٹا لے کر ٹیبل میں ڈالنے کا فنکشن 
 
+const getData = async () => {
+    result.innerHTML = "";
+    const response = await supabaseConnect.from("todos").select("*").order("id", { ascending: true });
+    const todos = response.data;
 
-todos.forEach((todo, index) => {
-    result.innerHTML += `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${todo.task}</td>
-            <td>
-                <button onclick="editTodo(${todo.id})">Edit</button>
-            </td>
-            <td>
-                <button onclick="deleteTodo(${todo.id})">Delete</button>
-            </td>
-        </tr>`;
-        console.log(todos)
-});
+    if (!todos) return;
+
+    todos.forEach((todo, index) => {
+        result.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${todo.task}</td>
+                <td>
+                    <button onclick="editTodo(${todo.id}, '${todo.task}')">Edit</button>
+                </td>
+                <td>
+                    <button onclick="deleteTodo(${todo.id})">Delete</button>
+                </td>
+            </tr>`;
+    });
 };
 
-getData()
+getData();
 
-   btn.addEventListener("click", async () => {
+//ایڈ ٹوڈو 
+btn.addEventListener("click", async () => {
     const task = inp.value.trim();
 
+    if (!task) {
+        Swal.fire({
+            icon: "warning",
+            title: "خالی ٹاسک!",
+            text: "براہ کرم پہلے کچھ لکھیں۔",
+            confirmButtonColor: "#2563eb"
+        });
+        return;
+    }
+
+    const { error } = await supabaseConnect.from("todos").insert([{ task: task }]);
+
+    if (error) {
+        Swal.fire({
+            icon: "error",
+            title: "ایرر!",
+            text: error.message
+        });
+        return;
+    }
+
+    inp.value = "";
+    getData();
     
-  
-if (!task) {
     Swal.fire({
-        icon: "warning",
-        title: "خالی ٹاسک!",
-        text: "براہ کرم پہلے کچھ لکھیں۔",
-        confirmButtonColor: "#2563eb"
+        icon: "success",
+        title: "ٹاسک شامل ہو گیا!",
+        timer: 1000,
+        showConfirmButton: false
     });
-    return;
-}
+});
 
-
+//ڈلیٹ 
 window.deleteTodo = async (id) => {
-    const result = await Swal.fire({
+    const confirmResult = await Swal.fire({
         title: "کیا آپ کو یقین ہے؟",
         text: "یہ ٹاسک مستقل طور پر ڈیلیٹ ہو جائے گا!",
         icon: "warning",
@@ -61,7 +82,7 @@ window.deleteTodo = async (id) => {
         cancelButtonText: "کینسل"
     });
 
-    if (!result.isConfirmed) return;
+    if (!confirmResult.isConfirmed) return;
 
     const { error } = await supabaseConnect.from("todos").delete().eq("id", id);
     if (!error) {
@@ -75,7 +96,7 @@ window.deleteTodo = async (id) => {
     }
 };
 
-
+// ایڈٹ 
 window.editTodo = async (id, currentTask) => {
     const { value: updatedTask } = await Swal.fire({
         title: "ٹاسک اپ ڈیٹ کریں",
@@ -107,4 +128,6 @@ window.editTodo = async (id, currentTask) => {
                 timer: 1200,
                 showConfirmButton: false
             });
-        }}}})
+        }
+    }
+};

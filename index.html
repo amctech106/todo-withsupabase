@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todo</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>My Todos</h1>
+    <div id="main">
+        <input type="text" id="add-todo">
+        <button>Add Todo</button>
+    </div>
+    <table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>S.N</th>
+            <th>Todos</th>
+            <th>Edit</th>
+            <th>Dlete</th>
+        </tr>
+    </thead>
+
+    <tbody id="result">
+
+    </tbody>
+</table>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./app.js"></script>
+</body>
+</html>
